@@ -82,9 +82,6 @@ void init(void) {
     // Checks connection to ESP and initialize ESP
     espInit();
 
-    // create freeRTOS task queue
-    freeRtosQueueWrapperCreate();
-
     // enables watchdog to check for reboots
     watchdog_enable(2000, 1);
 }
