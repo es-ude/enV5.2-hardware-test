@@ -4,10 +4,18 @@
 #include "Adxl345bTypedefs.h"
 #include "Common.h"
 #include "Esp.h"
+#include "Microphone.h"
 #include "Network.h"
 
 #include <hardware/i2c.h>
 #include <pico/stdlib.h>
+
+#define ADXL345B_I2C i2c1
+#define ADXL345B_ADDRESS ADXL345B_I2C_ALTERNATE_ADDRESS
+
+#define MICRO_GPIO 26
+#define MICRO_SAMPLING_RATE 16000
+#define MICRO_SAMPLE_COUNT 512
 
 static void initializeIo(void) {
     stdio_init_all();
@@ -54,10 +62,10 @@ static void makeSelfTest() {
     }
 }
 static void testAccelerometer(void) {
-    PRINT("=== TEST ADXL345b START");
+    PRINT("=== TEST ADXL345b START ===");
     adxl345bErrorCode_t error;
 
-    error = adxl345bInit(i2c1, ADXL345B_I2C_ALTERNATE_ADDRESS);
+    error = adxl345bInit(ADXL345B_I2C, ADXL345B_ADDRESS);
     if (error != ADXL345B_NO_ERROR) {
         PRINT("  Initialize Sensor failed! (0x%02X)", error);
         return;
@@ -67,10 +75,21 @@ static void testAccelerometer(void) {
     getSerialNumber();
     makeSelfTest();
 
-    PRINT("=== TEST ADXL345b DONE");
+    PRINT("=== TEST ADXL345b DONE ===");
 }
 static void testAmplifier(void) {
-    // TODO
+    PRINT("=== TEST MICROPHONE START ===");
+
+    microphoneIntialize(MICRO_GPIO);
+    PRINT("ADC for microphone initialized");
+
+    microphoneSetSamplingRate(MICRO_SAMPLING_RATE);
+    PRINT("Sampling-rate set to %u", MICRO_SAMPLING_RATE);
+
+    uint8_t samples[MICRO_SAMPLE_COUNT];
+    microphoneCapture(samples, MICRO_SAMPLE_COUNT, MICRO_GPIO);
+    PRINT_BYTE_ARRAY("Microphone samples:", samples, MICRO_SAMPLE_COUNT);
+    PRINT("=== TEST MICROPHONE DONE ===");
 }
 _Noreturn static void testBoard(void) {
     while (1) {
@@ -84,6 +103,11 @@ _Noreturn static void testBoard(void) {
             testAccelerometer();
             break;
         case 'm':
+            testAmplifier();
+            break;
+        case 'g':
+            testWifiModule();
+            testAccelerometer();
             testAmplifier();
             break;
         default:
