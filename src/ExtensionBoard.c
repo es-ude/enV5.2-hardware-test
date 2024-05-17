@@ -92,6 +92,7 @@ static void testAmplifier(void) {
     PRINT("=== TEST MICROPHONE DONE ===");
 }
 _Noreturn static void testBoard(void) {
+    PRINT("HELLO THERE");
     while (1) {
         char input = getchar_timeout_us(UINT32_MAX);
 
