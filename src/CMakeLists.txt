@@ -5,8 +5,15 @@ add_executable(extension-board
 target_include_directories(extension-board PUBLIC ${CMAKE_SOURCE_DIR}/src)
 target_link_libraries(extension-board
         pico_stdlib
-        microphone_lib
+        pico_bootrom
+        hardware_i2c
+
+        unity
+
         sensor_lib_adxl345b
         esp_lib
-        network_lib)
+        network_lib
+
+        microphone_lib
+)
 create_enV5_executable(extension-board)

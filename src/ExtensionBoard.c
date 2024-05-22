@@ -1,4 +1,4 @@
-#define SOURCE_FILE "MAIN"
+#define SOURCE_FILE "EXTENSION-BOARD"
 
 #include "Adxl345b.h"
 #include "Adxl345bTypedefs.h"
@@ -7,6 +7,8 @@
 #include "Microphone.h"
 #include "Network.h"
 
+#include "unity.h"
+#include <pico/bootrom.h>
 #include <hardware/i2c.h>
 #include <pico/stdlib.h>
 
@@ -19,105 +21,67 @@
 
 static void initializeIo(void) {
     stdio_init_all();
-    while ((!stdio_usb_connected())) {}
-}
-
-static void testWifiModule(void) {
-    PRINT("=== TEST WIFI START ===");
-
-    espInit();
-    PRINT("  ESP initialized!");
-
-    networkErrorCode_t error;
-
-    error = networkTryToConnectToNetworkUntilSuccessful();
-    if (error != NETWORK_NO_ERROR) {
-        PRINT("  Failed to Connect to WIFI (0x%02X)", error);
-        return;
+    while ((!stdio_usb_connected())) {
+        // Wait for Serial Connection
     }
-    PRINT("  \033[0;32mPASSED\033[0m");
-    PRINT("=== TEST WIFI DONE ===");
 }
-static void getSerialNumber() {
+
+void setUp(void) {}
+void tearDown(void) {}
+
+static void test_EspCanBeInitialized(void) {
+    espInit();
+}
+static void test_EspCanConnectToWifi(void) {
+    PRINT_DEBUG("ESP initialized!");
+    TEST_ASSERT_EQUAL_UINT8(NETWORK_NO_ERROR, networkTryToConnectToNetworkUntilSuccessful());
+}
+
+static void test_AccelerometerCanBeInitialized(void) {
+    TEST_ASSERT_EQUAL_UINT8(ADXL345B_NO_ERROR, adxl345bInit(ADXL345B_I2C, ADXL345B_ADDRESS));
+}
+static void test_AccelerometerGetSerialNumber(void) {
     uint8_t serialNumber = 0;
 
-    PRINT("Requesting serial number:");
-    adxl345bErrorCode_t errorCode = adxl345bReadSerialNumber(&serialNumber);
-    if (errorCode == ADXL345B_NO_ERROR) {
-        PRINT("  Expected: 0xE5, Actual: 0x%02X", serialNumber);
-        PRINT(serialNumber == 0xE5 ? "  \033[0;32mPASSED\033[0m" : "  \033[0;31mFAILED\033[0m;");
-    } else {
-        PRINT("  \033[0;31mFAILED\033[0m adxl345b_ERROR: %02X", errorCode);
-    }
+    TEST_ASSERT_EQUAL_UINT8(ADXL345B_NO_ERROR, adxl345bReadSerialNumber(&serialNumber));
+    TEST_ASSERT_EQUAL_UINT8(0xE5, serialNumber);
 }
-static void makeSelfTest() {
-    PRINT("Start self test:");
+static void test_AccelerometerPerformSelfTest(void) {
     int delta_x, delta_y, delta_z;
-    adxl345bErrorCode_t errorCode = adxl345bPerformSelfTest(&delta_x, &delta_y, &delta_z);
-    PRINT("  X: %iLSB, Y: %iLSB, Z: %iLSB", delta_x, delta_y, delta_z);
-    if (errorCode == ADXL345B_NO_ERROR) {
-        PRINT("  \033[0;32mPASSED\033[0m");
-    } else {
-        PRINT("  \033[0;31mFAILED\033[0m; adxl345b_ERROR: %02X", errorCode);
-    }
+    TEST_ASSERT_EQUAL_UINT8(ADXL345B_NO_ERROR,
+                            adxl345bPerformSelfTest(&delta_x, &delta_y, &delta_z));
+    PRINT_DEBUG("  X: %iLSB, Y: %iLSB, Z: %iLSB", delta_x, delta_y, delta_z);
 }
-static void testAccelerometer(void) {
-    PRINT("=== TEST ADXL345b START ===");
-    adxl345bErrorCode_t error;
 
-    error = adxl345bInit(ADXL345B_I2C, ADXL345B_ADDRESS);
-    if (error != ADXL345B_NO_ERROR) {
-        PRINT("  Initialize Sensor failed! (0x%02X)", error);
-        return;
-    }
-    PRINT("  Sensor initialized successful!");
-
-    getSerialNumber();
-    makeSelfTest();
-
-    PRINT("=== TEST ADXL345b DONE ===");
-}
-static void testAmplifier(void) {
-    PRINT("=== TEST MICROPHONE START ===");
-
+static void test_AmplifierCanBeInitialized(void) {
     microphoneIntialize(MICRO_GPIO);
-    PRINT("ADC for microphone initialized");
-
+    PRINT_DEBUG("Amplifier initialized");
     microphoneSetSamplingRate(MICRO_SAMPLING_RATE);
-    PRINT("Sampling-rate set to %u", MICRO_SAMPLING_RATE);
-
+    PRINT_DEBUG("Sampling-rate set to %u", MICRO_SAMPLING_RATE);
+}
+static void test_AmplifierCanReadData(void) {
     uint8_t samples[MICRO_SAMPLE_COUNT];
     microphoneCapture(samples, MICRO_SAMPLE_COUNT, MICRO_GPIO);
-    PRINT_BYTE_ARRAY("Microphone samples:", samples, MICRO_SAMPLE_COUNT);
-    PRINT("=== TEST MICROPHONE DONE ===");
-}
-_Noreturn static void testBoard(void) {
-    PRINT("HELLO THERE");
-    while (1) {
-        char input = getchar_timeout_us(UINT32_MAX);
-
-        switch (input) {
-        case 'w':
-            testWifiModule();
-            break;
-        case 'a':
-            testAccelerometer();
-            break;
-        case 'm':
-            testAmplifier();
-            break;
-        case 'g':
-            testWifiModule();
-            testAccelerometer();
-            testAmplifier();
-            break;
-        default:
-            PRINT("WRONG INPUT");
-        }
-    }
+    PRINT_BYTE_ARRAY_DEBUG("Microphone samples:", samples, MICRO_SAMPLE_COUNT);
 }
 
 int main() {
     initializeIo();
-    testBoard();
+
+    UNITY_BEGIN();
+
+    RUN_TEST(test_EspCanBeInitialized);
+    RUN_TEST(test_EspCanConnectToWifi);
+
+    RUN_TEST(test_AccelerometerCanBeInitialized);
+    RUN_TEST(test_AccelerometerGetSerialNumber);
+    RUN_TEST(test_AccelerometerPerformSelfTest);
+
+    RUN_TEST(test_AmplifierCanBeInitialized);
+    RUN_TEST(test_AmplifierCanReadData);
+
+
+    UNITY_END();
+
+    reset_usb_boot(0,0);
 }
