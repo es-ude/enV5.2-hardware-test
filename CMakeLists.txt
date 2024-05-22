@@ -20,6 +20,8 @@ load_enV5()
 # initialize pico-sdk
 pico_sdk_init()
 
+add_unity()
+
 if (TARGET tinyusb_device)
     # load libraries from runtime.enV5
     enV5_init()
