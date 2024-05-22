@@ -49,6 +49,11 @@ target_link_libraries(main-board-full
         sensor_lib_adxl345b
         esp_lib
         network_lib
+        common_lib
+        flash_lib
+        middleware_lib
+        enV5_hwc
+        sensor_lib_pac193x
 
         microphone_lib
 )
