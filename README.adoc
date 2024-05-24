@@ -165,6 +165,26 @@ This project contains various folders:
 |contains helpers and hardware test implementations
 |===
 
+== Flashing the ESP32 Module
+
+IMPORTANT: This may be required for newly arrived boards, since they are delivered without the ESP-Firmware!
+
+[source,bash]
+----
+$ pip install esptool #<1>
+
+$ esptool.py --port /dev/ttyUSB0 \ #<2>
+    --baud 1152000 \ #<3>
+    write_flash 0 \ #<4>
+    esp-firmware.bin #<5>
+----
+
+<1> Install the  https://pypi.org/project/esptool[esptool] from PyPi
+<2> Define the local port for the Debugging Probe
+<3> Define the baudrate for the Communication with the ESP32 module
+<4> Issue a command to write to address 0 \
+<5> Define the binary to be written to the ESP32 module
+
 == Further Reading
 
 * link:https://github.com/es-ude/elastic-ai.runtime.enV5/blob/d862d803a56f0371f9a027b0f304b9ddfa7cd541/README.adoc[enV5 README]
