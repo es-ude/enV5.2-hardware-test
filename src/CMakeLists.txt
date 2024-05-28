@@ -34,6 +34,7 @@ target_link_libraries(main-board-basic
         middleware_lib
         enV5_hwc
         sensor_lib_pac193x
+        fpga_configuration_handler
 )
 create_enV5_executable(main-board-basic)
 
@@ -54,6 +55,7 @@ target_link_libraries(main-board-full
         middleware_lib
         enV5_hwc
         sensor_lib_pac193x
+        fpga_configuration_handler
 
         microphone_lib
 )

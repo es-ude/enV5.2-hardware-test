@@ -7,12 +7,14 @@
 #define SOURCE_FILE "MAIN-BOARD-BASIC"
 
 #include "Common.h"
+#include "Esp.h"
 #include "Flash.h"
+#include "FpgaConfigurationHandler.h"
 #include "I2cTypedefs.h"
+#include "Network.h"
 #include "Pac193x.h"
 #include "SpiTypedefs.h"
 #include "enV5HwController.h"
-#include "middleware.h"
 
 #include <hardware/i2c.h>
 #include <hardware/spi.h>
@@ -20,7 +22,6 @@
 #include <pico/stdlib.h>
 
 #include "unity.h"
-#include <stdlib.h>
 
 bool flashOK = false;
 
@@ -61,6 +62,17 @@ spi_t fpgaConfig = {.spi = SPI_INSTANCE,
                     .misoPin = SPI_MISO_PIN,
                     .mosiPin = SPI_MOSI_PIN,
                     .baudrate = 5000000};
+
+char urlSlow[] = "http://192.168.178.74:5000/getslow";
+char urlFast[] = "http://192.168.178.74:5000/getfast";
+/* region S15 config */
+size_t slowBinfileLength = 85540;
+size_t fastBinfileLength = 86116;
+/* endregion S15 config */
+/* region S50 config */
+// size_t slowBinfileLength = 231608;
+// size_t fastBinfileLength = 232360;
+/* endregion S50 config */
 /* endregion Flash/FPGA config */
 
 void setUp(void) {}
@@ -82,6 +94,7 @@ static void test_McuBlinkLed(void) {
         result = getchar_timeout_us(UINT32_MAX);
     } while (result == PICO_ERROR_TIMEOUT);
     TEST_ASSERT_EQUAL_CHAR('o', (char)result);
+    env5HwLedsAllOff();
 }
 
 static void test_PowerSensor(pac193xSensorConfiguration_t sensorToTest) {
@@ -149,12 +162,30 @@ static void test_Flash(void) {
     flashOK = true;
 }
 
-static void test_Fpga(void) {
+static void test_BlinkFpga(char *url, size_t length) {
+    env5HwFpgaPowersOff();
+    fpgaConfigurationHandlerDownloadConfigurationViaHttp(url, length, 1);
+    sleep_ms(500);
     env5HwFpgaPowersOn();
+    PRINT("Please press 'o' if the FPGA leds are on!");
+    int result;
+    do {
+        result = getchar_timeout_us(UINT32_MAX);
+    } while (result == PICO_ERROR_TIMEOUT);
+    TEST_ASSERT_EQUAL_CHAR('o', (char)result);
+    env5HwFpgaPowersOff();
+}
+static void test_Fpga(void) {
+    flashInit(&flashConfig, SPI_CS_PIN);
+    espInit();
+    while (ESP_NO_ERROR != espSendCommand("AT+CWMODE=1", "OK", 100))
+        ;
+    networkTryToConnectToNetworkUntilSuccessful();
 
-    // TODO: Load Blink bin to Flash
+    test_BlinkFpga(urlSlow, slowBinfileLength);
+    test_BlinkFpga(urlFast, fastBinfileLength);
+
     // TODO: Reconfigure
-    // TODO: Blink LED
     // TODO: Send/Receive
 }
 

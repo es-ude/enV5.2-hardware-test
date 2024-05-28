@@ -32,6 +32,8 @@ void tearDown(void) {}
 
 static void test_EspModule(void) {
     espInit();
+    while (ESP_NO_ERROR != espSendCommand("AT+CWMODE=1", "OK", 100))
+        ;
     PRINT_DEBUG("ESP initialized!");
     TEST_ASSERT_EQUAL_UINT8(NETWORK_NO_ERROR, networkTryToConnectToNetworkUntilSuccessful());
 }
@@ -66,9 +68,9 @@ int main() {
 
     UNITY_BEGIN();
 
-    RUN_TEST(test_EspModule);
     RUN_TEST(test_Accelerometer);
     RUN_TEST(test_Amplifier);
+    RUN_TEST(test_EspModule);
 
     UNITY_END();
 
