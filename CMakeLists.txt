@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.21...3.24)
+cmake_minimum_required(VERSION 3.21)
 include(${CMAKE_CURRENT_LIST_DIR}/helper.cmake)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
@@ -6,6 +6,8 @@ if (DEBUG_OUTPUT)
     # enable PRINT_DEBUG macro
     add_definitions(-DDEBUG_MODE)
 endif ()
+
+set(REVISION "2")
 
 message(NOTICE "INFO: Building for enV5 hardware (Type: ${CMAKE_BUILD_TYPE})")
 

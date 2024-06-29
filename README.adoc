@@ -38,13 +38,19 @@ If you want to do this by yourself, please refer to <<CMake>>.
 You have to adjust the network/mqtt broker credentials as mentioned in the link:https://github.com/es-ude/elastic-ai.runtime.enV5/blob/d862d803a56f0371f9a027b0f304b9ddfa7cd541/src/network/README.adoc[network README]!
 ====
 
+[IMPORTANT]
+====
+You have to adjust the base URL and the used FPGA type.
+
+This can be achieved by updating the appropriate fields in the link:src/CMakeLists.txt[] file.
+====
+
 [#_cmake]
 == CMake
 
 There are three CMake Profiles provided with the CLion settings:
-*Debug*, *Release*, and *UnitTests*.
+*Debug*, *Release*.
 
-Only the _UnitTests_ profile allows you to compile source code for your local machine and therefore run the unit tests.
 The _Debug_ and _Release_ targets differ only in the amount of printed information when the software is executed on an enV5-device.
 
 .Profiles
