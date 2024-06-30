@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.21...3.24)
 include(${CMAKE_CURRENT_LIST_DIR}/helper.cmake)
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
