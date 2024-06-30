@@ -10,7 +10,7 @@
  * @brief setup adc for microphone
  * @param gpio[in] input pin for raw data (GPIO26 to GPIO29)
  */
-void microphoneIntialize(gpioPin_t gpio);
+void microphoneInitialize(gpioPin_t gpio);
 
 /*!
  * @brief set the required sampling rate for the ADC

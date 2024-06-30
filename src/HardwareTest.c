@@ -141,8 +141,6 @@ static void test_PowerSensor2(void) {
 
 static void test_EspModule(void) {
     espInit();
-    while (ESP_NO_ERROR != espSendCommand("AT+CWMODE=1", "OK", 100))
-        ;
     PRINT_DEBUG("ESP initialized!");
     TEST_ASSERT_EQUAL_UINT8(NETWORK_NO_ERROR, networkTryToConnectToNetworkUntilSuccessful());
 
@@ -163,7 +161,7 @@ static void test_Accelerometer(void) {
 }
 
 static void test_Amplifier(void) {
-    microphoneIntialize(MICRO_GPIO);
+    microphoneInitialize(MICRO_GPIO);
     PRINT_DEBUG("Amplifier initialized");
     microphoneSetSamplingRate(MICRO_SAMPLING_RATE);
     PRINT_DEBUG("Sampling-rate set to %u", MICRO_SAMPLING_RATE);

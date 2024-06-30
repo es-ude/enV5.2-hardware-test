@@ -9,7 +9,7 @@
 #define PICO_CLOCK_FREQUENCY (48.0f * 1000000)
 #endif
 
-void microphoneIntialize(gpioPin_t gpio) {
+void microphoneInitialize(gpioPin_t gpio) {
     adc_init();
     adc_gpio_init(gpio);
 }
