@@ -7,45 +7,29 @@ if (DEBUG_OUTPUT)
     add_definitions(-DDEBUG_MODE)
 endif ()
 
-if (UNIT_TEST)
-    message(NOTICE "INFO: Building for local machine")
+set(REVISION "2")
 
-    project(enV5 C CXX ASM)
+message(NOTICE "INFO: Building for enV5 hardware (Type: ${CMAKE_BUILD_TYPE})")
 
-    # enable test execution via CMake
-    include(CTest)
+# include pico-sdk
+set(PICO_SDK_FETCH_FROM_GIT on)
+include(pico_sdk_import.cmake)
 
-    load_enV5()
+project(enV5 C CXX ASM)
 
-    # setup unit-tests
-    enV5_init_unit_tests()
+load_enV5()
 
-    # add your own unit-tests
-    add_subdirectory(test/unit)
-else ()
-    message(NOTICE "INFO: Building for enV5 hardware (Type: ${CMAKE_BUILD_TYPE})")
+# initialize pico-sdk
+pico_sdk_init()
 
-    # include pico-sdk
-    set(PICO_SDK_FETCH_FROM_GIT on)
-    include(pico_sdk_import.cmake)
+add_unity()
 
-    project(enV5 C CXX ASM)
+if (TARGET tinyusb_device)
+    # load libraries from runtime.enV5
+    enV5_init()
 
-    load_enV5()
-
-    # initialize pico-sdk
-    pico_sdk_init()
-
-    if (TARGET tinyusb_device)
-        # load libraries from runtime.enV5
-        enV5_init()
-
-        # add your own hardware tests
-        add_subdirectory(test/hardware)
-
-        # add your own main target
-        add_subdirectory(src)
-    elseif (PICO_ON_DEVICE)
-        message(WARNING "not building Project because TinyUSB submodule is not initialized in the SDK")
-    endif ()
+    # add your own main target
+    add_subdirectory(src)
+elseif (PICO_ON_DEVICE)
+    message(WARNING "not building Project because TinyUSB submodule is not initialized in the SDK")
 endif ()

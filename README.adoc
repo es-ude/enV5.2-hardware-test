@@ -1,4 +1,4 @@
-= enV5 Base Project
+= enV5.2 Hardware Tests
 :toc:
 :toclevels: 3
 :toc-placement!:
@@ -11,8 +11,7 @@ ifdef::env-github[]
 endif::[]
 
 [.lead]
-This repository aims to provide a clean start for projects concerning the Elastic-AI Node Version 5 (enV5) hardware platform.
-It includes the hardware support libraries from the https://github.com/es-ude/elastic-ai.runtime.enV5[elastic-ai.runtime.enV5 repository] as well as other required dependencies like the pico-sdk or Unity.
+This project aims to provide simple implementations to test newly produced/delivered enV5 hardware.
 
 toc::[]
 
@@ -37,64 +36,35 @@ If you want to do this by yourself, please refer to <<CMake>>.
 [IMPORTANT]
 ====
 You have to adjust the network/mqtt broker credentials as mentioned in the link:https://github.com/es-ude/elastic-ai.runtime.enV5/blob/d862d803a56f0371f9a027b0f304b9ddfa7cd541/src/network/README.adoc[network README]!
+====
 
-Alternatively, you can pass these settings via CMake Flags to the Profile initialization:
+[IMPORTANT]
+====
+You have to adjust the base URL and the used FPGA type.
 
-- WiFi Name: `-D WIFI_SSID:STRING=<ssid>`
-- WiFi Password: `-D WIFI_PWD:STRING=<password>`
-- MQTT Host/IP: `-D MQTT_HOST:STRING=<host>`
-- MQTT Port: `-D MQTT_PORT:STRING=<port>`
-- MQTT Broker User: `-D MQTT_USER:STRING=<user>`
-- MQTT Password for User: `-D MQTT_PWD:STRING=<password>`
+This can be achieved by updating the appropriate fields in the link:src/CMakeLists.txt[] file.
 ====
 
 [#_cmake]
 == CMake
 
 There are three CMake Profiles provided with the CLion settings:
-*Debug*, *Release*, and *UnitTests*.
+*Debug*, *Release*.
 
-Only the _UnitTests_ profile allows you to compile source code for your local machine and therefore run the unit tests.
 The _Debug_ and _Release_ targets differ only in the amount of printed information when the software is executed on an enV5-device.
 
 .Profiles
 [source,bash]
 ----
-# Unit-test profile
-cmake -B build/unit-test -G Ninja -D CMAKE_BUILD_TYPE=DEBUG -D UNIT_TEST:BOOL=ON -D DEBUG_MODE:BOOL=ON
-
 # Debug profile
-cmake -B build/debug -G Ninja -D CMAKE_BUILD_TYPE=DEBUG -D UNIT_TEST:BOOL=OFF -D DEBUG_MODE:BOOL=ON
+cmake -B build/debug -G Ninja -D CMAKE_BUILD_TYPE=DEBUG -D DEBUG_MODE:BOOL=ON
 
 # Release profile
-cmake -B build/release -G Ninja -D CMAKE_BUILD_TYPE=RELEASE -D UNIT_TEST:BOOL=OFF -D DEBUG_MODE:BOOL=OFF
+cmake -B build/release -G Ninja -D CMAKE_BUILD_TYPE=RELEASE -D DEBUG_MODE:BOOL=OFF
 ----
 
 The flag `-G Ninja` tells CMake to use Ninja as the build tool.
 If this flag is not passed, CMake will use the default build tool on your machine (mostly Makefiles).
-
-[#_target:_local_machine]
-=== Target: Local Machine
-
-The local execution of the source code requires a different hal implementation, due to the fact that the hal implementation from the `src` folder is directly connected to the pico-sdk which forces the compiler to build for the RP2040 arm-based platform instead of your local machine.
-The enV5 repository provides the hal dummies for the local machine.
-
-[#_unit_tests]
-==== Unit Tests
-
-The unit-tests can be build and executed by running:
-
-[source,bash]
-----
-# build the unit-tests
-cmake --build build/unit-test -j 4 --clean-first
-
-# execute the unit-tests
-ctest --test-dir build/unit-test/test/unit --output-on-failure
-----
-
-The built unit-tests can then be found under
-link:build/unit-test/test/unit[build/unit-tests/test/unit] as executables.
 
 [#_target_pico]
 === Target Pico
@@ -182,9 +152,6 @@ There are three profiles in total:
 
 * `Debug`: build targets for the RP2040 with debug logs
 * `Release`: build targets for the RP2040 without debug logs
-* `Unit Test`: regular unit test executables
-
-Switching the profiles also "`fixes`" include paths, so if you have a unit test open, Clion will not recognize the inclusion of the unity.h file, as it is only included under the `Unit Test` profile.
 
 == Project structure
 
@@ -195,20 +162,34 @@ This project contains various folders:
 |Folder |Description
 
 |link:build[]
-|contains all CMake generated build scripts
+|contains all CMake generated build scripts and resources
 
 |link:out[]
 |contains all executables (`*.uf2` binary files) for the enV5
 
 |link:src[]
-|contains _Main.c_, helpers and your own source code
-
-|link:test/hardware/[]
-|contains your own hardware tests
-
-|link:test/unit[]
-|contains your own unit tests
+|contains helpers and hardware test implementations
 |===
+
+== Flashing the ESP32 Module
+
+IMPORTANT: This may be required for newly arrived boards, since they are delivered without the ESP-Firmware!
+
+[source,bash]
+----
+$ pip install esptool #<1>
+
+$ esptool.py --port /dev/ttyUSB0 \ #<2>
+    --baud 1152000 \ #<3>
+    write_flash 0 \ #<4>
+    esp-firmware.bin #<5>
+----
+
+<1> Install the  https://pypi.org/project/esptool[esptool] from PyPi
+<2> Define the local port for the Debugging Probe
+<3> Define the baudrate for the Communication with the ESP32 module
+<4> Issue a command to write to address 0 \
+<5> Define the binary to be written to the ESP32 module
 
 == Further Reading
 
