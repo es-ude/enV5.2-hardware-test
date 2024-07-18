@@ -1,9 +1,9 @@
 
 add_compile_definitions(
-        S15 # uncomment for enV5 with Spartan-7 S15
-        #S50 # uncomment for enV5 with Spartan-7 S50
+        #S15 # uncomment for enV5 with Spartan-7 S15
+        S50 # uncomment for enV5 with Spartan-7 S50
 
-        URL_BASE="127.0.0.1:5000" # replace with the URL shown by Flask after starting the `BinFileUpload.py` script
+        URL_BASE="192.168.204.24" # replace with the URL shown by Flask after starting the `BinFileUpload.py` script
 )
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/microphone)

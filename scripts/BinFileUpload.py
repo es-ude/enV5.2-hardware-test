@@ -2,7 +2,7 @@ from io import BytesIO
 from flask import Flask, send_file
 
 bytes_per_request = 256  # should be matching with the page size of the flash
-fpga_version = "s15" # allows fast switch between s15 and s50
+fpga_version = "s50" # allows fast switch between s15 and s50
 
 app = Flask(__name__)
 
