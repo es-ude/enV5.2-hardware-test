@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="CMakeSharedSettings">
-    <configurations>
-      <configuration PROFILE_NAME="Debug" ENABLED="true" GENERATION_DIR="build/debug" CONFIG_NAME="Debug" GENERATION_OPTIONS="-G Ninja -DDEBUG_OUTPUT:BOOL=1" />
-      <configuration PROFILE_NAME="Release" ENABLED="true" GENERATION_DIR="build/release" CONFIG_NAME="MinSizeRel" GENERATION_OPTIONS="-G Ninja -DDEBUG_OUTPUT:BOOL=0" />
-    </configurations>
-  </component>
-</project>
